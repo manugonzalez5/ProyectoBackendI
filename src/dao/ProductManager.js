@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from 'fs';
 
 class ProductManager {
     static path = "./src/data/products.json";
@@ -57,5 +57,5 @@ class ProductManager {
     }
 }
 
-module.exports = { ProductManager };
+export default ProductManager;
 

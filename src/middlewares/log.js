@@ -2,4 +2,4 @@ const log = (req, res, next) => {
     next()
 }
 
-module.exports = { log }
+export default log;

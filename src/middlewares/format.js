@@ -2,4 +2,4 @@ const format = (req, res, next) => {
     next()
 }
 
-module.exports = { format } 
+export default format; 

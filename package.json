@@ -9,11 +9,13 @@
   },
   "keywords": [],
   "author": "",
+  "type": "module",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "colors": "^1.4.0",
     "express": "^4.21.2",
-    "express-handlebars": "^8.0.1"
+    "express-handlebars": "^8.0.1",
+    "socket.io": "^4.8.1"
   }
 }

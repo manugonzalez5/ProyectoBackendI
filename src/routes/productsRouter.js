@@ -1,6 +1,7 @@
-const { ProductManager } = require('../dao/ProductManager.js');
-const { Router } = require('express');
+import  ProductManager  from '../dao/ProductManager.js';  
+import  Router  from 'express';
 const router = Router();
+import  io  from '../app.js';
 
 // Listado de productos
 router.get('/', async (req, res) => {
@@ -50,7 +51,8 @@ router.post('/', async (req, res) => {
         };
 
         const createdProduct = await ProductManager.createProduct(newProduct);
-
+        // Emitir evento a través de WebSocket
+        io.emit('producto agregado', createdProduct); // Emitimos el nuevo producto a todos los clientes
         res.status(201).json({ createdProduct });
     } catch (err) {
         res.status(500).send({ error: err.message });
@@ -93,11 +95,12 @@ router.delete('/:id', async (req, res) => {
         if (!deleted) {
             return res.status(404).send({ error: `Producto con id ${id} no encontrado` });
         }
-
+        // Emitir evento a través de WebSocket
+        io.emit('producto eliminado', id); // Emitimos el ID del producto eliminado a todos los clientes
         res.status(200).send({ message: `Producto con id ${id} eliminado correctamente` });
     } catch (err) {
         res.status(500).send({ error: err.message });
     }
 });
 
-module.exports = router;
+export default router;

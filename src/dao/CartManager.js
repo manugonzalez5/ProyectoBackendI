@@ -1,4 +1,4 @@
-const fs = require("fs");
+import fs from 'fs';
 
 class CartManager {
     static path = "./src/data/carts.json";
@@ -58,6 +58,6 @@ class CartManager {
     }
 }
 
-module.exports = { CartManager };
+export default CartManager;
 
 
