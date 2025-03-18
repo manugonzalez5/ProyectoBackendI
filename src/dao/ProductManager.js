@@ -9,7 +9,6 @@ class ProductManager {
     static async getProducts() {
         try {
             const data = await fs.readFile(this.path, 'utf-8'); // Usar this.path
-            console.log('Contenido de products.json:', data); // Depuración
             return JSON.parse(data);
         } catch (error) {
             if (error.code === 'ENOENT') {

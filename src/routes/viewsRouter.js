@@ -8,7 +8,6 @@ router.get('/', async (req, res) => {
     try {
         // Llamada al método estático getProducts
         const products = await ProductManager.getProducts();
-        console.log('Productos obtenidos:', products); // Depuración
         res.render('home', { products });
     } catch (error) {
         res.status(500).render('error', { error: error.message });

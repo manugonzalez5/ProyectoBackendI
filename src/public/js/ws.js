@@ -6,6 +6,5 @@ socket.on('nuevaTemperatura', (temperatura) => {
 });
 
 socket.on("nuevoProducto", (product) => {
-    console.log(product);
     alert(`Se ha agregado un nuevo producto: ${product.title}`);
 });
