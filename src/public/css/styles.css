@@ -1,0 +1,80 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Estilos para los botones */
+.btn-realtime, .btn-toggle {
+    display: inline-block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.btn-realtime {
+    background-color: #28a745; /* Verde */
+}
+
+.btn-realtime:hover {
+    background-color: #218838;
+}
+
+.btn-toggle {
+    background-color: #007bff; /* Azul */
+    margin-left: 10px; /* Espacio entre botones */
+}
+
+.btn-toggle:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para la lista de productos */
+.product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.product-list li {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.product-list h3 {
+    margin: 0;
+    color: #333;
+}
+
+.product-list p {
+    margin: 5px 0;
+    color: #555;
+}

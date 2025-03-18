@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 
 class CartManager {
     static path = "./src/data/carts.json";
