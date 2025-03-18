@@ -93,7 +93,8 @@ h1 {
 }
 
 .product-form textarea {
-    resize: vertical; /* Permite redimensionar verticalmente el textarea */
+    resize: vertical;
+    /* Permite redimensionar verticalmente el textarea */
 }
 
 .product-form label {

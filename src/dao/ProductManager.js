@@ -26,22 +26,22 @@ class ProductManager {
             // Lista de campos obligatorios (sin "code")
             const requiredFields = ['title', 'description', 'price', 'stock'];
             const missingFields = requiredFields.filter(field => !product[field]);
-            
+
             // Verificar campos obligatorios
             if (missingFields.length > 0) {
                 throw new Error(`Faltan los siguientes campos obligatorios: ${missingFields.join(', ')}`);
             }
-    
+
             // Obtener la lista de productos
             const products = await this.getProducts();
-    
+
             // Crear el nuevo producto
             const newProduct = { ...product, id: uuidv4() }; // Generar un ID único
             const updatedProducts = [...products, newProduct];
-    
+
             // Guardar la lista actualizada de productos
             await fs.writeFile(this.path, JSON.stringify(updatedProducts, null, 2));
-    
+
             return newProduct;
         } catch (error) {
             throw new Error('Error al crear el producto: ' + error.message);
