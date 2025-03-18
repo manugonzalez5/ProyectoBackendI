@@ -1,23 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos en Tiempo Real</title>
+    <link rel="stylesheet" href="/css/styles.css"> 
+</head>
+
+<body>
     <div class="container">
         <h1>Productos en Tiempo Real</h1>
 
+        <!-- Botón para redirigir a home.handlebars -->
+        <a href="/" class="btn">Volver a la Lista de Productos</a>
+
         <!-- Formulario para crear un producto -->
         <form id="formCrearProducto" class="product-form">
+            <!-- Título -->
             <input type="text" id="title" placeholder="Título" required>
-            <input type="text" id="description" placeholder="Descripción" required>
+
+            <!-- Precio -->
             <input type="number" id="price" placeholder="Precio" required>
-            <input type="text" id="code" placeholder="Código" required>
+
+            <!-- Descripción -->
+            <textarea id="description" placeholder="Descripción" required></textarea>
+
+            <!-- Categoría -->
+            <input type="text" id="category" placeholder="Categoría" required>
+
+            <!-- Imagen (enlace) -->
+            <input type="url" id="image" placeholder="Enlace de la imagen" required>
+
+            <!-- Estado (true o false) -->
+            <label for="status">
+                <input type="checkbox" id="status"> Disponible
+            </label>
+
+            <!-- Stock -->
             <input type="number" id="stock" placeholder="Stock" required>
+
+            <!-- Botón de envío -->
             <button type="submit">Crear Producto</button>
         </form>
 
         <!-- Lista de productos -->
         <ul id="listaProductos" class="product-list">
             {{#each products}}
-                <li id="producto-{{this.id}}" class="product-item">
-                    <span>{{this.title}} - ${{this.price}}</span>
-                    <button onclick="eliminarProducto({{this.id}})" class="delete-btn">Eliminar</button>
-                </li>
+            <li id="producto-{{this.id}}" class="product-item">
+                <div class="product-image">
+                    <img src="{{this.image}}" alt="{{this.title}}" class="thumbnail-img">
+                </div>
+                <div class="product-info">
+                    <span class="product-title">{{this.title}}</span>
+                    <span class="product-price">${{this.price}}</span>
+                    <span class="product-stock">Stock: {{this.stock}}</span>
+                    <span class="product-status">{{#if this.status}}Disponible{{else}}No disponible{{/if}}</span>
+                </div>
+                <button onclick="eliminarProducto('{{this.id}}')" class="delete-btn">Eliminar</button>
+            </li>
             {{/each}}
         </ul>
     </div>
@@ -38,8 +79,16 @@
                 nuevoProducto.id = `producto-${product.id}`;
                 nuevoProducto.className = 'product-item';
                 nuevoProducto.innerHTML = `
-                    <span>${product.title} - $${product.price}</span>
-                    <button onclick="eliminarProducto(${product.id})" class="delete-btn">Eliminar</button>
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.title}" class="thumbnail-img">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-title">${product.title}</span>
+                        <span class="product-price">$${product.price}</span>
+                        <span class="product-stock">Stock: ${product.stock}</span>
+                        <span class="product-status">${product.status ? 'Disponible' : 'No disponible'}</span>
+                    </div>
+                    <button onclick="eliminarProducto('${product.id}')" class="delete-btn">Eliminar</button>
                 `;
                 lista.appendChild(nuevoProducto);
             });
@@ -53,13 +102,19 @@
         // Enviar evento para crear un producto
         document.getElementById('formCrearProducto').addEventListener('submit', (e) => {
             e.preventDefault();
+
             const producto = {
                 title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
                 price: parseFloat(document.getElementById('price').value),
-                code: document.getElementById('code').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                image: document.getElementById('image').value,
+                thumbnail: document.getElementById('image').value, // Copiar el valor de "image" a "thumbnail"
+                status: document.getElementById('status').checked,
                 stock: parseInt(document.getElementById('stock').value),
             };
+
+            // Enviar el producto al servidor
             socket.emit('crearProducto', producto);
         });
 
@@ -68,3 +123,6 @@
             socket.emit('eliminarProducto', id);
         };
     </script>
+</body>
+
+</html>

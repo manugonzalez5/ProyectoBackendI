@@ -2,25 +2,27 @@ import express from 'express';
 import ProductManager from '../dao/ProductManager.js';
 
 const router = express.Router();
-const productManager = new ProductManager('../data/products.json');
 
-// Página de inicio
+// Ruta para obtener y mostrar productos
 router.get('/', async (req, res) => {
     try {
-        const products = await productManager.getProducts();
+        // Llamada al método estático getProducts
+        const products = await ProductManager.getProducts();
+        console.log('Productos obtenidos:', products); // Depuración
         res.render('home', { products });
     } catch (error) {
-        res.status(500).send({ error: error.message });
+        res.status(500).render('error', { error: error.message });
     }
 });
+
 
 // Página de productos en tiempo real
 router.get('/realtimeproducts', async (req, res) => {
     try {
-        const products = await productManager.getProducts();
+        const products = await ProductManager.getProducts(); // Llama al método getProducts de la instancia
         res.render('realTimeProducts', { products });
     } catch (error) {
-        res.status(500).send({ error: error.message });
+        res.status(500).render('error', { error: error.message });
     }
 });
 

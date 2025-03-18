@@ -1,127 +1,95 @@
-import fs from 'fs/promises'; 
+import fs from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
 
 class ProductManager {
+    // Propiedad estática para la ruta del archivo
     static path = "./src/data/products.json";
 
-    // Listado de productos
+    // Método estático para obtener productos
     static async getProducts() {
         try {
-            if (fs.existsSync(this.path)) {
-                const data = await fs.readFile(this.path, 'utf-8');
-                return JSON.parse(data);
-            } else {
+            const data = await fs.readFile(this.path, 'utf-8'); // Usar this.path
+            console.log('Contenido de products.json:', data); // Depuración
+            return JSON.parse(data);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.error('El archivo products.json no existe.'); // Depuración
                 return [];
             }
-        } catch (error) {
             throw new Error('Error al obtener los productos: ' + error.message);
         }
     }
 
-    // Crear un producto
-    static async createProduct(product) {
+
+    static async addProduct(product) {
         try {
-            // Validar campos obligatorios
-            const requiredFields = ['title', 'description', 'price', 'code', 'stock'];
-            for (const field of requiredFields) {
-                if (!product[field]) {
-                    throw new Error(`El campo ${field} es obligatorio`);
-                }
+            // Lista de campos obligatorios (sin "code")
+            const requiredFields = ['title', 'description', 'price', 'stock'];
+            const missingFields = requiredFields.filter(field => !product[field]);
+            
+            // Verificar campos obligatorios
+            if (missingFields.length > 0) {
+                throw new Error(`Faltan los siguientes campos obligatorios: ${missingFields.join(', ')}`);
             }
-
-            // Obtener productos existentes
+    
+            // Obtener la lista de productos
             const products = await this.getProducts();
-
-            // Validar código único
-            const codeExists = products.some(p => p.code === product.code);
-            if (codeExists) {
-                throw new Error('El código del producto ya existe');
-            }
-
-            // Generar nuevo ID
-            const newId = products.length > 0 ? products[products.length - 1].id + 1 : 1;
-            const newProduct = { ...product, id: newId };
-
-            // Agregar el nuevo producto y guardar en el archivo
+    
+            // Crear el nuevo producto
+            const newProduct = { ...product, id: uuidv4() }; // Generar un ID único
             const updatedProducts = [...products, newProduct];
+    
+            // Guardar la lista actualizada de productos
             await fs.writeFile(this.path, JSON.stringify(updatedProducts, null, 2));
-
+    
             return newProduct;
         } catch (error) {
             throw new Error('Error al crear el producto: ' + error.message);
         }
     }
 
-    // Buscar un producto por ID
     static async getProductById(id) {
         try {
             const products = await this.getProducts();
             const product = products.find(product => product.id === id);
-
             if (!product) {
                 throw new Error(`Producto con ID ${id} no encontrado`);
             }
-
             return product;
         } catch (error) {
             throw new Error('Error al obtener el producto: ' + error.message);
         }
     }
 
-    // Eliminar un producto por ID
     static async deleteProductById(id) {
         try {
-            // Validar que el ID sea un número
-            if (isNaN(id)) {
-                throw new Error('El ID debe ser un número válido');
-            }
-
-            // Obtener productos existentes
             const products = await this.getProducts();
-
-            // Buscar el índice del producto a eliminar
             const productIndex = products.findIndex(product => product.id === id);
-
-            // Si no se encuentra el producto, lanzar un error
             if (productIndex === -1) {
                 throw new Error(`Producto con ID ${id} no encontrado`);
             }
-
-            // Eliminar el producto del array
             products.splice(productIndex, 1);
-
-            // Guardar los productos actualizados en el archivo
             await fs.writeFile(this.path, JSON.stringify(products, null, 2));
-
             return `Producto con ID ${id} eliminado correctamente`;
         } catch (error) {
             throw new Error('Error al eliminar el producto: ' + error.message);
         }
     }
 
-    // Actualizar un producto por ID
     static async updateProductById(id, productData) {
         try {
-            // Validar que el ID sea un número
-            if (isNaN(id)) {
-                throw new Error('El ID debe ser un número válido');
+            if (productData.id && productData.id !== id) {
+                throw new Error('No se puede modificar el ID de un producto');
             }
 
-            // Obtener productos existentes
             const products = await this.getProducts();
-
-            // Buscar el índice del producto a actualizar
             const productIndex = products.findIndex(product => product.id === id);
-
-            // Si no se encuentra el producto, lanzar un error
             if (productIndex === -1) {
                 throw new Error(`Producto con ID ${id} no encontrado`);
             }
 
-            // Actualizar el producto
             const updatedProduct = { ...products[productIndex], ...productData };
             products[productIndex] = updatedProduct;
-
-            // Guardar los productos actualizados en el archivo
             await fs.writeFile(this.path, JSON.stringify(products, null, 2));
 
             return updatedProduct;

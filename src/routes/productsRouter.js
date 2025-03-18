@@ -1,105 +1,109 @@
-import  ProductManager  from '../dao/ProductManager.js';  
-import  Router  from 'express';
+import ProductManager from '../dao/ProductManager.js';
+import Router from 'express';
 const router = Router();
-import  io  from '../app.js';
+//import io from '../app.js';
 
 // Listado de productos
 router.get('/', async (req, res) => {
     try {
         let products = await ProductManager.getProducts();
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json({ products });
+        res.status(200).json({ data: products });
     } catch (err) {
-        res.status(500).send({ error: err.message });
+        res.status(500).send({ error: `Error en el servidor: ${err.message}` });
     }
 });
 
 // Buscador de productos por ID
 router.get('/:id', async (req, res) => {
     try {
-        let product = await ProductManager.getProductById(parseInt(req.params.id));
-        if (!product) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).send({ error: `No existen productos con id ${req.params.id}` });
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).send({ error: 'El ID debe ser un número válido' });
         }
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json({ product });
+
+        let product = await ProductManager.getProductById(id);
+        if (!product) {
+            return res.status(404).send({ error: `No existen productos con id ${id}` });
+        }
+
+        res.status(200).json({ data: product });
     } catch (err) {
-        res.status(500).send({ error: err.message });
+        res.status(500).send({ error: `Error en el servidor: ${err.message}` });
     }
 });
 
 // Crear un producto
 router.post('/', async (req, res) => {
     try {
-        const { title, description, code, price, status, stock, category, thumbnails } = req.body;
+        const { title, description, price, status, stock, category, thumbnails } = req.body;
 
         // Validaciones
-        if (!title || !description || !code || !price || !status || !stock || !category || !thumbnails) {
+        if (!title || !description || !price || !status || !stock || !category || !thumbnails) {
             return res.status(400).send({ error: 'Todos los campos son requeridos' });
         }
+        if (isNaN(price) || isNaN(stock)) {
+            return res.status(400).send({ error: 'El precio y el stock deben ser números' });
+        }
+        if (!Array.isArray(thumbnails)) {
+            return res.status(400).send({ error: 'Thumbnails debe ser un array' });
+        }
 
-        const newProduct = {
-            title,
-            description,
-            code,
-            price,
-            status,
-            stock,
-            category,
-            thumbnails
-        };
+        const newProduct = { title, description, price, status, stock, category, thumbnails };
+        const createdProduct = await ProductManager.addProduct(newProduct);
 
-        const createdProduct = await ProductManager.createProduct(newProduct);
         // Emitir evento a través de WebSocket
-        io.emit('producto agregado', createdProduct); // Emitimos el nuevo producto a todos los clientes
-        res.status(201).json({ createdProduct });
+        io.emit('producto agregado', createdProduct);
+
+        res.status(201).json({ data: createdProduct });
     } catch (err) {
-        res.status(500).send({ error: err.message });
+        res.status(500).send({ error: `Error en el servidor: ${err.message}` });
     }
 });
 
 // Actualizar un producto
 router.put('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { title, description, code, price, status, stock, category, thumbnails } = req.body;
-
-        // Validaciones
-        if (!title && !description && !code && !price && !status && !stock && !category && !thumbnails) {
-            return res.status(400).send({ error: 'No hay datos para actualizar' });
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).send({ error: 'El ID debe ser un número válido' });
         }
 
-        // Obtener el producto
-        const updatedProduct = await ProductManager.updateProductById(parseInt(id), {
-            title, description, code, price, status, stock, category, thumbnails
-        });
+        const allowedFields = ['title', 'description', 'price', 'status', 'stock', 'category', 'thumbnails'];
+        const updates = Object.keys(req.body).filter(key => allowedFields.includes(key));
+        if (updates.length === 0) {
+            return res.status(400).send({ error: 'No se proporcionaron campos válidos para actualizar' });
+        }
 
+        const updatedProduct = await ProductManager.updateProductById(id, req.body);
         if (!updatedProduct) {
             return res.status(404).send({ error: `Producto con id ${id} no encontrado` });
         }
 
-        res.status(200).json({ updatedProduct });
+        res.status(200).json({ data: updatedProduct });
     } catch (err) {
-        res.status(500).send({ error: err.message });
+        res.status(500).send({ error: `Error en el servidor: ${err.message}` });
     }
 });
 
 // Eliminar un producto
 router.delete('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        
-        const deleted = await ProductManager.deleteProductById(parseInt(id));
-        
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).send({ error: 'El ID debe ser un número válido' });
+        }
+
+        const deleted = await ProductManager.deleteProductById(id);
         if (!deleted) {
             return res.status(404).send({ error: `Producto con id ${id} no encontrado` });
         }
+
         // Emitir evento a través de WebSocket
-        io.emit('producto eliminado', id); // Emitimos el ID del producto eliminado a todos los clientes
-        res.status(200).send({ message: `Producto con id ${id} eliminado correctamente` });
+        io.emit('producto eliminado', id);
+
+        res.status(200).send({ data: `Producto con id ${id} eliminado correctamente` });
     } catch (err) {
-        res.status(500).send({ error: err.message });
+        res.status(500).send({ error: `Error en el servidor: ${err.message}` });
     }
 });
 
