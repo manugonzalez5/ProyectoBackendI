@@ -1,5 +1,5 @@
 import express from 'express';
-import ProductManager from '../dao/ProductManager.js';
+import { ProductosMongoManager } from '../dao/ProductosMongoManager.js';
 
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         // Llamada al método estático getProducts
-        const products = await ProductManager.getProducts();
+        const products = await ProductosMongoManager.get();
         res.render('home', { products });
     } catch (error) {
         res.status(500).render('error', { error: error.message });
@@ -18,11 +18,16 @@ router.get('/', async (req, res) => {
 // Página de productos en tiempo real
 router.get('/realtimeproducts', async (req, res) => {
     try {
-        const products = await ProductManager.getProducts(); // Llama al método getProducts de la instancia
+        const products = await ProductosMongoManager.get(); // Llama al método getProducts de la instancia
         res.render('realTimeProducts', { products });
     } catch (error) {
         res.status(500).render('error', { error: error.message });
     }
+});
+
+router.get('/productos/', async (req, res) => {
+    let productos= await ProductosMongoManager.get();
+    res.render('products', { productos });
 });
 
 export default router;

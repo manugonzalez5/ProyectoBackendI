@@ -4,10 +4,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import ProductManager from './dao/ProductManager.js';
-import productsRouter from './routes/productsRouter.js';
-import cartsRouter from './routes/cartsRouter.js';
+// import ProductManager from './dao/ProductManager.js';
+// import productsRouter from './routes/productsRouter.js';
+// import cartsRouter from './routes/cartsRouter.js';
+import { ProductosMongoManager } from './dao/ProductosMongoManager.js';
+import { CartMongoManager } from './dao/CartMongoManager.js';
+import cartsMongoRouter from './routes/cartsMongoRouter.js';
+import productsMongoRouter  from './routes/productsMongoRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
+import { conectarDB } from './utils/conDB.js';
+import { config } from './config/config.js';
 
 
 // Configuración de __dirname para ES Modules
@@ -18,6 +24,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
+
+// Middleware
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
 // Configuración de Handlebars
 app.engine('handlebars', engine({
@@ -39,8 +49,8 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-app.use("/api/products", productsRouter); // Rutas de la API para productos
-app.use("/api/carts", cartsRouter);       // Rutas de la API para carritos
+app.use("/api/products", productsMongoRouter); // Rutas de la API para productos
+app.use("/api/carts", cartsMongoRouter);       // Rutas de la API para carritos
 app.use("/", viewsRouter);                // Rutas de las vistas (Handlebars)
 
 // Configuración de Socket.io
@@ -50,8 +60,8 @@ io.on('connection', (socket) => {
     // Escuchar evento para crear un producto
     socket.on('crearProducto', async (producto) => {
         try {
-            await ProductManager.addProduct(producto); // Llamar al método estático
-            const products = await ProductManager.getProducts(); // Llamar al método estático
+            await ProductosMongoManager.save(producto); // Llamar al método estático
+            const products = await ProductosMongoManager.get(); // Llamar al método estático
             io.emit('productosActualizados', products); // Emitir la lista actualizada
         } catch (error) {
             socket.emit('error', error.message);
@@ -61,8 +71,8 @@ io.on('connection', (socket) => {
     // Escuchar evento para eliminar un producto
     socket.on('eliminarProducto', async (id) => {
         try {
-            await ProductManager.deleteProductById(id); // Llamar al método estático
-            const products = await ProductManager.getProducts(); // Llamar al método estático
+            await ProductosMongoManager.delete(id); // Llamar al método estático
+            const products = await ProductosMongoManager.get(); // Llamar al método estático
             io.emit('productosActualizados', products); // Emitir la lista actualizada
         } catch (error) {
             socket.emit('error', error.message);
@@ -77,7 +87,7 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar el servidor
-const PORT = 8080;
+const PORT = config.PORT;
 httpServer.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 }).on('error', (err) => {
@@ -87,3 +97,8 @@ httpServer.listen(PORT, () => {
         console.error('Error al iniciar el servidor:', err);
     }
 });
+
+conectarDB(
+    config.MONGO_URL,
+    config.DB_NAME
+)
