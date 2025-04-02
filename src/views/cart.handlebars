@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito {{cid}} - Mi Tienda</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/cart.css">
+</head>
+<body>
+    <div class="cart-container">
+        <!-- Encabezado del carrito -->
+        <div class="cart-header">
+            <h1 class="cart-title"><i class="fas fa-shopping-cart"></i> Mi Carrito</h1>
+            <span class="cart-id">ID: {{cid}}</span>
+        </div>
+        
+        {{#if cart.products.length}}
+        <!-- Lista de productos en el carrito -->
+        <div class="cart-items">
+            {{#each cart.products}}
+            <div class="cart-item" data-product-id="{{this.product._id}}">
+                <div class="item-image">
+                    <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}">
+                </div>
+                <div class="item-details">
+                    <h3 class="item-title">{{this.product.title}}</h3>
+                    <p class="item-price">${{this.product.price}} c/u</p>
+                    
+                    <div class="item-quantity">
+                        <button class="quantity-btn minus" data-action="decrease">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="quantity">{{this.quantity}}</span>
+                        <button class="quantity-btn plus" data-action="increase">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <p class="item-total">Total: ${{multiply this.product.price this.quantity}}</p>
+                </div>
+                
+                <button class="remove-item-btn" data-product-id="{{this.product._id}}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            {{/each}}
+        </div>
+        
+        <!-- Resumen del carrito -->
+        <div class="cart-summary">
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span>${{calculateSubtotal cart.products}}</span>
+            </div>
+            <div class="summary-row">
+                <span>Envío:</span>
+                <span>${{calculateShipping cart.products}}</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total:</span>
+                <span>${{calculateTotal cart.products}}</span>
+            </div>
+        </div>
+        
+        <!-- Acciones del carrito -->
+        <div class="cart-actions">
+            <a href="/products" class="cart-btn btn-continue">
+                <i class="fas fa-arrow-left"></i> Seguir Comprando
+            </a>
+            <button class="cart-btn btn-empty-cart">
+                <i class="fas fa-trash"></i> Vaciar Carrito
+            </button>
+            <a href="/checkout" class="cart-btn btn-checkout">
+                <i class="fas fa-credit-card"></i> Finalizar Compra
+            </a>
+        </div>
+        {{else}}
+        <!-- Carrito vacío -->
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="fas fa-shopping-cart fa-4x"></i>
+            </div>
+            <p class="empty-cart-message">Tu carrito está vacío</p>
+            <a href="/products" class="btn-shop">
+                <i class="fas fa-store"></i> Ir a Productos
+            </a>
+        </div>
+        {{/if}}
+    </div>
+
+    <!-- Scripts para funcionalidad -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Manejar cambio de cantidad
+            document.querySelectorAll('.quantity-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const action = e.currentTarget.dataset.action;
+                    const productId = e.currentTarget.closest('.cart-item').dataset.productId;
+                    const quantityElement = e.currentTarget.closest('.item-quantity').querySelector('.quantity');
+                    
+                    try {
+                        const response = await fetch(`/api/carts/{{cid}}/products/${productId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ action })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Error al actualizar cantidad');
+                        }
+                        
+                        const result = await response.json();
+                        quantityElement.textContent = result.newQuantity;
+                        
+                        // Recargar para actualizar totales
+                        location.reload();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                    }
+                });
+            });
+            
+            // Eliminar producto
+            document.querySelectorAll('.remove-item-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if (!confirm('¿Eliminar este producto del carrito?')) return;
+                    
+                    const productId = e.currentTarget.dataset.productId;
+                    
+                    try {
+                        const response = await fetch(`/api/carts/{{cid}}/products/${productId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Error al eliminar producto');
+                        }
+                        
+                        location.reload();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                    }
+                });
+            });
+            
+            // Vaciar carrito
+            const emptyCartBtn = document.querySelector('.btn-empty-cart');
+            if (emptyCartBtn) {
+                emptyCartBtn.addEventListener('click', async () => {
+                    if (!confirm('¿Estás seguro de vaciar completamente el carrito?')) return;
+                    
+                    try {
+                        const response = await fetch(`/api/carts/{{cid}}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Error al vaciar carrito');
+                        }
+                        
+                        location.reload();
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

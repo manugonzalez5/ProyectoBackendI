@@ -1,0 +1,202 @@
+[
+    {
+        "code": "PROD-1",
+        "title": "Fjallraven - Mochila Foldsack No. 1, Para 15 Laptops",
+        "description": "Tu mochila perfecta para el uso diario y paseos en el bosque. Guarda tu laptop (hasta 15 pulgadas) en el bolsillo acolchado.",
+        "price": 109.95,
+        "stock": 30,
+        "category": "men's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg"]
+    },
+    {
+        "code": "PROD-2",
+        "title": "Camiseta Casual Premium para Hombre - Ajuste Delgado",
+        "description": "Estilo ajustado, manga raglán contrastante, cuello henley con tres botones, tejido ligero y suave para mayor comodidad.",
+        "price": 22.3,
+        "stock": 100,
+        "category": "men's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg"]
+    },
+    {
+        "code": "PROD-3",
+        "title": "Chaqueta de Algodón para Hombre",
+        "description": "Excelente chaqueta para todas las estaciones, ideal para actividades al aire libre como senderismo o viajes. Un regalo perfecto.",
+        "price": 55.99,
+        "stock": 50,
+        "category": "men's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg"]
+    },
+    {
+        "code": "PROD-4",
+        "title": "Ajuste Delgado Casual para Hombre",
+        "description": "El color puede variar ligeramente entre la imagen y el producto real. Consulte la guía de tallas antes de comprar.",
+        "price": 15.99,
+        "stock": 150,
+        "category": "men's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_.jpg"]
+    },
+    {
+        "code": "PROD-5",
+        "title": "Pulsera de Cadena John Hardy Mujer - Leyendas Naga Oro y Plata",
+        "description": "Inspirada en el dragón de agua mítico que protege la perla del océano. Úsala hacia adentro para amor o hacia afuera para protección.",
+        "price": 695,
+        "stock": 20,
+        "category": "jewelery",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_.jpg"]
+    },
+    {
+        "code": "PROD-6",
+        "title": "Micropavé Sólido de Oro Pequeño",
+        "description": "Garantía de satisfacción. Diseñado y vendido por Hafeez Center en Estados Unidos. Devuelve o cambia dentro de 30 días.",
+        "price": 168,
+        "stock": 50,
+        "category": "jewelery",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/61sbMiUnoGL._AC_UL640_QL65_ML3_.jpg"]
+    },
+    {
+        "code": "PROD-7",
+        "title": "Anillo de Princesa en Baño de Oro Blanco",
+        "description": "Anillo de compromiso clásico con diamante solitario. Ideal para regalar en bodas, aniversarios o San Valentín.",
+        "price": 9.99,
+        "stock": 75,
+        "category": "jewelery",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_.jpg"]
+    },
+    {
+        "code": "PROD-8",
+        "title": "Aretes de Tapón Doble de Acero Inoxidable Bañados en Oro Rosa",
+        "description": "Aretes de tapón doble con acabado en oro rosa. Hechos de acero inoxidable 316L para mayor durabilidad.",
+        "price": 10.99,
+        "stock": 40,
+        "category": "jewelery",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/51UDEzMJVpL._AC_UL640_QL65_ML3_.jpg"]
+    },
+    {
+        "code": "PROD-9",
+        "title": "Disco Duro Externo WD 2TB Elements Portable - USB 3.0",
+        "description": "Compatibilidad con USB 3.0 y 2.0. Mejora el rendimiento de tu PC. Formateado para Windows, puede requerir reformateo para otros sistemas.",
+        "price": 64,
+        "stock": 200,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg"]
+    },
+    {
+        "code": "PROD-10",
+        "title": "Disco SSD Interno SanDisk PLUS 1TB - SATA III 6 Gb/s",
+        "description": "Mejora el arranque y la velocidad de carga de aplicaciones. Velocidades de lectura/escritura de hasta 535MB/s y 450MB/s.",
+        "price": 109,
+        "stock": 80,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg"]
+    },
+    {
+        "code": "PROD-11",
+        "title": "Disco SSD Silicon Power 256GB - 3D NAND A55",
+        "description": "Tecnología 3D NAND para altas velocidades. Diseño delgado de 7mm ideal para ultrabooks. Soporta TRIM y RAID.",
+        "price": 109,
+        "stock": 120,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71kWymZ+c+L._AC_SX679_.jpg"]
+    },
+    {
+        "code": "PROD-12",
+        "title": "Disco Duro Externo WD 4TB para Gaming - Compatible con Playstation 4",
+        "description": "Amplía tu experiencia de gaming en PS4. Diseño portátil y elegante con garantía limitada de 3 años.",
+        "price": 114,
+        "stock": 90,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/61mtL65D4cL._AC_SX679_.jpg"]
+    },
+    {
+        "code": "PROD-13",
+        "title": "Monitor Acer SB220Q bi 21.5 Pulgadas Full HD IPS Ultra Delgado",
+        "description": "Pantalla IPS Full HD de 21.5 pulgadas con tecnología AMD Radeon FreeSync. Tiempo de respuesta de 4ms y ángulo de visión de 178°.",
+        "price": 599,
+        "stock": 15,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/81QpkIctqPL._AC_SX679_.jpg"]
+    },
+    {
+        "code": "PROD-14",
+        "title": "Monitor Curvo Samsung 49 Pulgadas CHG90 144Hz - QLED Super Ultrawide",
+        "description": "Pantalla QLED Super Ultrawide 32:9 con HDR. Tasa de refresco de 144Hz y tiempo de respuesta de 1ms para gaming sin motion blur.",
+        "price": 999.99,
+        "stock": 10,
+        "category": "electronics",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg"]
+    },
+    {
+        "code": "PROD-15",
+        "title": "Chaqueta de Snowboard 3-en-1 para Mujer BIYLACLESEN - Invierno",
+        "description": "Abrigo de invierno desmontable con forro polar. Ideal para snowboard y actividades al aire libre en climas fríos.",
+        "price": 56.99,
+        "stock": 60,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_.jpg"]
+    },
+    {
+        "code": "PROD-16",
+        "title": "Chaqueta Motera Falsa de Cuero para Mujer con Capucha Desmontable",
+        "description": "Chaqueta estilo motera en material de cuero falso. Incluye capucha desmontable y bolsillos con cremallera.",
+        "price": 29.95,
+        "stock": 110,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/81XH0e8fefL._AC_UY879_.jpg"]
+    },
+    {
+        "code": "PROD-17",
+        "title": "Impermeable para Mujer con Rayas - Windbreaker",
+        "description": "Impermeable ligero con capucha ajustable y cinturón. Bolsillos laterales y diseño a rayas. Ideal para viajes o uso casual.",
+        "price": 39.99,
+        "stock": 85,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2.jpg"]
+    },
+    {
+        "code": "PROD-18",
+        "title": "Blusa para Mujer MBJ - Cuello Bote Manga Corta",
+        "description": "95% Rayón y 5% Spandex. Tejido ligero con gran elasticidad para mayor comodidad. Costillas en mangas y cuello.",
+        "price": 9.85,
+        "stock": 200,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/71z3kpMAYsL._AC_UY879_.jpg"]
+    },
+    {
+        "code": "PROD-19",
+        "title": "Camiseta para Mujer Opna - Manga Corta Transpirable",
+        "description": "100% Poliéster. Tejido transpirable que absorbe la humedad. Cuello en V y ajuste más delgado para un estilo femenino.",
+        "price": 7.95,
+        "stock": 180,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/51eg55uWmdL._AC_UX679_.jpg"]
+    },
+    {
+        "code": "PROD-20",
+        "title": "Camiseta Casual para Mujer DANVOUY - Algodón Corto",
+        "description": "95% Algodón y 5% Spandex. Cuello en V con estampado de letras. Tejido suave y elástico para uso casual o deportivo.",
+        "price": 12.99,
+        "stock": 160,
+        "category": "women's clothing",
+        "status": true,
+        "thumbnails": ["https://fakestoreapi.com/img/61pHAEJ4NML._AC_UX679_.jpg"]
+    }
+]

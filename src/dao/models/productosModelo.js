@@ -1,20 +1,29 @@
-import moongose from 'mongoose';
+import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-const productosSchema= new moongose.Schema(
+const productosSchema= new mongoose.Schema(
     {
-        title: String,
         code:{
             type: String,
             required: true,
             unique: true,
         },
-        price: Number,
+        title: String,
+        description: String,
+        price: { 
+            type:Number,
+            min: 0,
+        },
         stock: {
             type: Number, 
-            default: 0
+            default: 0,
+            min: 0,
         },
         category: String,
+        status: {
+            type: Boolean,
+            default: true,
+        },
         thumbnails: [],
     },
     {
@@ -25,4 +34,4 @@ const productosSchema= new moongose.Schema(
 
 productosSchema.plugin(paginate); // Paginación
 
-export const productoModelo= moongose.model('productos', productosSchema); // Crear el modelo
+export const productoModelo= mongoose.model('productos', productosSchema); // Crear el modelo

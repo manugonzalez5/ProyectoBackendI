@@ -1,48 +1,63 @@
-import { productoModelo } from "./models/productosModelo.js"; // Importamos el modelo de producto
+import { get } from "mongoose";
+import { productoModelo } from "./models/productosModelo.js";
+
 export class ProductosMongoManager {
-    static async get(page=1, limit=10) { // Devuelve todos los productos
-        try{
-            return await productoModelo.paginate({}, {page, limit, lean: true}).find();
-        }    
-        catch(err){
-            console.log(err);
+    static async get(filter = {}, options = {}) {
+        try {
+            return await productoModelo.paginate(filter, options);
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.get():", err);
+            throw err;
         }
     }
-    static async getBy(filtro={}) { // Puede recibir un filtro o no
-        try{
-            return await productoModelo.findOne(filtro).lean();
-        } 
-        catch(err){
-            console.log(err);
+
+    static async getByCode(code) {
+        try {
+            return await productoModelo.findOne({ code }).lean();
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.getByCode():", err);
+            throw err;
         }
     }
-    static async save(producto) { // Recibe un producto y lo guarda en la base de datos
-        //return await productoModelo.create(producto);
-        try{
-            let nuevoProducto = await productoModelo.create(producto);
+
+    static async getById(id) {
+        try {
+            return await productoModelo.findById(id).lean();
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.getById():", err);
+            throw err;
+        }
+    }
+
+    static async create(producto) {
+        try {
+            const nuevoProducto = await productoModelo.create(producto);
             return nuevoProducto.toJSON();
-        } 
-        catch(err){
-            console.log(err);
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.create():", err);
+            throw err;
         }
     }
 
-    static async update(id, aModificar) { // Recibe un id y un producto y lo reemplaza en la base de datos
-        try{
-            return await productoModelo.findByIdAndUpdate(id, aModificar, { new: true }).lean();
-        } 
-        catch(err){
-            console.log(err);
-    }    
-}
+    static async update(id, aModificar) {
+        try {
+            return await productoModelo.findByIdAndUpdate(
+                id, 
+                aModificar, 
+                { new: true, runValidators: true }
+            ).lean();
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.update():", err);
+            throw err;
+        }
+    }
 
-    static async delete(id) { // Recibe un id y lo elimina de la base de datos
-        //return await productoModelo.deleteOne({ _id: id });
+    static async delete(id) {
         try {
             return await productoModelo.findByIdAndDelete(id).lean();
-        } 
-        catch(err){
-            console.log(err);
+        } catch (err) {
+            console.error("Error en ProductosMongoManager.delete():", err);
+            throw err;
         }
-    } 
+    }
 }

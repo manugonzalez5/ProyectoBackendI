@@ -1,0 +1,177 @@
+<div class="detail-container">
+    <a href="/" class="detail-back-btn">← Volver a Inicio</a>
+
+    <div class="detail-layout">
+        <!-- Galería de imágenes -->
+        <div class="detail-gallery">
+            <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}" class="detail-main-image" id="mainImage">
+            <div class="detail-thumbnails">
+                {{#each product.thumbnails}}
+                <img src="{{this}}" alt="{{../product.title}}" class="detail-thumbnail" data-image="{{this}}">
+                {{/each}}
+            </div>
+        </div>
+
+        <!-- Información del producto -->
+        <div class="detail-info">
+            <h1 class="detail-title">{{product.title}}</h1>
+            <p class="detail-code">Código: {{product.code}}</p>
+
+            <div class="detail-price-section">
+                <span class="detail-price">${{product.price}}</span>
+                <span class="detail-stock {{#if product.available}}detail-stock-in{{else}}detail-stock-out{{/if}}">
+                    {{#if product.available}}
+                    En stock ({{product.stock}} unidades)
+                    {{else}}
+                    <i class="fas fa-times-circle"></i> Agotado
+                    {{/if}}
+                </span>
+            </div>
+
+            <div class="detail-description">
+                <h3>Descripción</h3>
+                <p>{{product.description}}</p>
+            </div>
+
+            <div class="detail-meta">
+                <div class="detail-meta-item">
+                    <span class="detail-meta-label">Categoría:</span>
+                    <span class="detail-meta-value">{{product.category}}</span>
+                </div>
+            </div>
+
+            <!-- Sección de compra -->
+            <div class="detail-purchase">
+                <form class="detail-cart-form" id="addToCartForm">
+                    <div class="quantity-selector">
+                        <button type="button" class="quantity-btn minus">-</button>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{product.stock}}"
+                            class="quantity-input">
+                        <button type="button" class="quantity-btn plus">+</button>
+                    </div>
+
+                    <button type="submit" class="add-to-cart-btn" {{#unless product.available}}disabled{{/unless}}>
+                        {{#if product.available}}
+                        <i class="fas fa-shopping-cart"></i> Agregar al carrito
+                        {{else}}
+                        <i class="fas fa-times-circle"></i> Producto agotado
+                        {{/if}}
+                    </button>
+                </form>
+
+                <!-- Mensaje de feedback mejorado -->
+                <div id="feedbackMessage" class="feedback-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script optimizado y corregido -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Galería interactiva
+        document.querySelectorAll('.detail-thumbnail').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                document.getElementById('mainImage').src = thumb.dataset.image;
+                // Remover clase activa de todas las miniaturas
+                document.querySelectorAll('.detail-thumbnail').forEach(t => t.classList.remove('active'));
+                // Agregar clase activa a la miniatura seleccionada
+                thumb.classList.add('active');
+            });
+        });
+
+        // Control de cantidad
+        const quantityInput = document.getElementById('quantity');
+        const maxQuantity = parseInt(quantityInput.max);
+        const minusBtn = document.querySelector('.quantity-btn.minus');
+        const plusBtn = document.querySelector('.quantity-btn.plus');
+
+        minusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            quantityInput.value = value > 1 ? value - 1 : 1;
+            updateButtonStates();
+        });
+
+        plusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            quantityInput.value = value < maxQuantity ? value + 1 : maxQuantity;
+            updateButtonStates();
+        });
+
+        quantityInput.addEventListener('change', () => {
+            let value = parseInt(quantityInput.value);
+            if (isNaN(value) value = 1;
+            quantityInput.value = Math.max(1, Math.min(value, maxQuantity));
+            updateButtonStates();
+        });
+
+        function updateButtonStates() {
+            const currentValue = parseInt(quantityInput.value);
+            minusBtn.disabled = currentValue <= 1;
+            plusBtn.disabled = currentValue >= maxQuantity;
+        }
+
+        // Manejo del formulario mejorado
+        const form = document.getElementById('addToCartForm');
+        const feedback = document.getElementById('feedbackMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productId = '{{product._id}}';
+            const quantity = parseInt(quantityInput.value);
+
+            // Mostrar estado de carga
+            feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-message loading';
+
+            try {
+                const response = await fetch('/api/carts/add-product', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        productId,
+                        quantity
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error en el servidor');
+                }
+
+                const result = await response.json();
+
+                // Feedback de éxito
+                feedback.innerHTML = `
+                    <i class="fas fa-check-circle"></i> 
+                    ${result.message || 'Producto agregado al carrito'}
+                    <a href="/cart" class="feedback-link">Ver carrito</a>
+                `;
+                feedback.className = 'feedback-message success';
+
+                // Actualizar contador del carrito si existe
+                if (typeof updateCartCounter === 'function') {
+                    updateCartCounter();
+                }
+
+            } catch (error) {
+                feedback.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i> 
+                    ${error.message || 'Error al agregar al carrito'}
+                `;
+                feedback.className = 'feedback-message error';
+                console.error('Error:', error);
+            } finally {
+                // Ocultar mensaje después de 5 segundos
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 5000);
+            }
+        });
+    });
+</script>

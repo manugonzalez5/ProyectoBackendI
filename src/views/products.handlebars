@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Productos</title>
+    <title>Productos</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
-
 <body>
     <div class="container">
-        <h1>Lista de productos</h1>
-        <!-- Botón para redirigir a realtimeproducts.handlebars -->
-        <a href="/realtimeproducts" class="btn">Ir a Agregar/Eliminar Productos</a>
+        <h1>Lista de Productos</h1>
         
         {{#if productos.length}}
         <div class="product-grid">
@@ -47,5 +43,4 @@
         {{/if}}
     </div>
 </body>
-
 </html>
