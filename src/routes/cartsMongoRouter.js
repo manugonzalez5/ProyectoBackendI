@@ -3,6 +3,7 @@ import { CartMongoManager } from '../dao/CartMongoManager.js';
 import { isValidObjectId } from 'mongoose';
 import { ProductosMongoManager } from '../dao/ProductosMongoManager.js';
 import { productoModelo } from '../dao/models/productosModelo.js';
+import mongoose from 'mongoose';
 
 export const router = Router();
 
@@ -161,4 +162,98 @@ router.delete('/:cid', async (req, res) => {
     res.status(200).json(cart);
 });
 
+router.post('/:cid/purchase', async (req, res) => {
+    const { cid } = req.params;
+    
+    try {
+        //  Validación del ID del carrito
+        if (!isValidObjectId(cid)) {
+            return res.status(400).json({ 
+                status: 'error',
+                error: 'ID de carrito inválido',
+                message: 'El ID proporcionado no es un formato válido de MongoDB'
+            });
+        }
+
+        //  Procesar la compra
+        const result = await CartMongoManager.purchaseCart(cid);
+
+        // Verificar si se procesó alguna compra
+        if (result.productsNotPurchased.length > 0 && result.ticket.products.length === 0) {
+            return res.status(400).json({
+                status: 'error',
+                error: 'Stock insuficiente',
+                message: 'Ningún producto pudo ser comprado por falta de stock',
+                productsWithoutStock: result.productsNotPurchased
+            });
+        }
+
+        //  Respuesta exitosa
+        res.status(200).json({
+            status: 'success',
+            message: result.productsNotPurchased.length > 0 
+                ? 'Compra parcialmente completada (algunos productos no tenían stock)' 
+                : 'Compra completada con éxito',
+            ticket: result.ticket,
+            productsNotPurchased: result.productsNotPurchased
+        });
+
+    } catch (error) {
+        // Manejo de error específico
+        if (error.message.includes('no encontrado')) {
+            return res.status(404).json({
+                status: 'error',
+                error: 'Carrito no encontrado',
+                message: error.message
+            });
+        }
+        
+        if (error.message.includes('vacío')) {
+            return res.status(400).json({
+                status: 'error',
+                error: 'Carrito vacío',
+                message: error.message
+            });
+        }
+
+        // Error genérico
+        console.error('Error en purchaseCart:', error);
+        res.status(500).json({
+            status: 'error',
+            error: 'Error interno del servidor',
+            message: 'Ocurrió un error al procesar la compra',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+router.post('/add-product', async (req, res) => {
+    try {
+        const { productId, quantity } = req.body;
+        
+        // Validaciones básicas
+        if (!isValidObjectId(productId) || !Number.isInteger(quantity) || quantity < 1) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Datos de entrada inválidos'
+            });
+        }
+
+        // Obtener o crear carrito (usando el ID de carrito del usuario si está autenticado)
+        const cartId = req.user?.cart || new mongoose.Types.ObjectId();
+        const cart = await CartMongoManager.addProductToCart(cartId, productId, quantity);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Producto agregado al carrito',
+            payload: cart
+        });
+    } catch (error) {
+        console.error('Error al agregar producto:', error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+});
 export default router;

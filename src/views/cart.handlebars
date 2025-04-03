@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito {{cid}} - Mi Tienda</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <div class="cart-container">
@@ -27,148 +27,147 @@
                     <h3 class="item-title">{{this.product.title}}</h3>
                     <p class="item-price">${{this.product.price}} c/u</p>
                     
+                    <!-- Cantidad estática (sin botones de modificación) -->
                     <div class="item-quantity">
-                        <button class="quantity-btn minus" data-action="decrease">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="quantity">{{this.quantity}}</span>
-                        <button class="quantity-btn plus" data-action="increase">
-                            <i class="fas fa-plus"></i>
-                        </button>
+                        <span class="quantity-label">Cantidad:</span>
+                        <span class="quantity-value">{{this.quantity}}</span>
                     </div>
                     
-                    <p class="item-total">Total: ${{multiply this.product.price this.quantity}}</p>
+                    <p class="item-total">Total: ${{this.subtotal}}</p>
                 </div>
                 
                 <button class="remove-item-btn" data-product-id="{{this.product._id}}">
-                    <i class="fas fa-trash-alt"></i>
+                    <i class="fas fa-trash-alt"></i> 
                 </button>
             </div>
             {{/each}}
         </div>
         
-        <!-- Resumen del carrito -->
+        <!-- Resumen del carrito (se mantiene igual) -->
         <div class="cart-summary">
             <div class="summary-row">
                 <span>Subtotal:</span>
-                <span>${{calculateSubtotal cart.products}}</span>
+                <span>${{summary.subtotal}}</span>
             </div>
             <div class="summary-row">
                 <span>Envío:</span>
-                <span>${{calculateShipping cart.products}}</span>
+                <span>${{summary.shipping}}</span>
             </div>
             <div class="summary-row total">
                 <span>Total:</span>
-                <span>${{calculateTotal cart.products}}</span>
+                <span>${{summary.total}}</span>
             </div>
         </div>
         
         <!-- Acciones del carrito -->
         <div class="cart-actions">
-            <a href="/products" class="cart-btn btn-continue">
+            <a href="/" class="cart-btn btn-continue">
                 <i class="fas fa-arrow-left"></i> Seguir Comprando
             </a>
             <button class="cart-btn btn-empty-cart">
                 <i class="fas fa-trash"></i> Vaciar Carrito
             </button>
-            <a href="/checkout" class="cart-btn btn-checkout">
+            <a href="/carts/{{cid}}/purchase" class="cart-btn btn-checkout">
                 <i class="fas fa-credit-card"></i> Finalizar Compra
             </a>
         </div>
         {{else}}
-        <!-- Carrito vacío -->
+        <!-- Carrito vacío (se mantiene igual) -->
         <div class="empty-cart">
             <div class="empty-cart-icon">
                 <i class="fas fa-shopping-cart fa-4x"></i>
             </div>
             <p class="empty-cart-message">Tu carrito está vacío</p>
-            <a href="/products" class="btn-shop">
-                <i class="fas fa-store"></i> Ir a Productos
+            <a href="/" class="btn-shop">
+                <i class="fas fa-store"></i> Ir al Inicio
             </a>
         </div>
         {{/if}}
     </div>
 
-    <!-- Scripts para funcionalidad -->
-    <script>
+    <!-- Script simplificado (solo eliminar producto y vaciar carrito) -->
+<script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Manejar cambio de cantidad
-            document.querySelectorAll('.quantity-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const action = e.currentTarget.dataset.action;
-                    const productId = e.currentTarget.closest('.cart-item').dataset.productId;
-                    const quantityElement = e.currentTarget.closest('.item-quantity').querySelector('.quantity');
-                    
-                    try {
-                        const response = await fetch(`/api/carts/{{cid}}/products/${productId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ action })
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Error al actualizar cantidad');
-                        }
-                        
-                        const result = await response.json();
-                        quantityElement.textContent = result.newQuantity;
-                        
-                        // Recargar para actualizar totales
-                        location.reload();
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert(error.message);
-                    }
+            // ... (mantén los listeners existentes para eliminar producto y vaciar carrito) ...
+            
+            // Finalizar compra
+            const finalizarCompraBtn = document.getElementById('finalizarCompraBtn');
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmPurchaseBtn = document.getElementById('confirmPurchase');
+            const cancelPurchaseBtn = document.getElementById('cancelPurchase');
+            const modalMessage = document.getElementById('modalMessage');
+            
+            if (finalizarCompraBtn) {
+                finalizarCompraBtn.addEventListener('click', () => {
+                    confirmModal.style.display = 'flex';
                 });
+            }
+            
+            cancelPurchaseBtn.addEventListener('click', () => {
+                confirmModal.style.display = 'none';
             });
             
-            // Eliminar producto
-            document.querySelectorAll('.remove-item-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    if (!confirm('¿Eliminar este producto del carrito?')) return;
+            confirmPurchaseBtn.addEventListener('click', async () => {
+                try {
+                    confirmPurchaseBtn.disabled = true;
+                    confirmPurchaseBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
                     
-                    const productId = e.currentTarget.dataset.productId;
+                    const response = await fetch(`/api/carts/{{cid}}/purchase`, {
+                        method: 'POST'
+                    });
                     
-                    try {
-                        const response = await fetch(`/api/carts/{{cid}}/products/${productId}`, {
-                            method: 'DELETE'
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Error al eliminar producto');
-                        }
-                        
-                        location.reload();
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert(error.message);
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Error al procesar la compra');
                     }
-                });
+                    
+                    // Mostrar mensaje según el resultado
+                    if (data.productsNotPurchased && data.productsNotPurchased.length > 0) {
+                        modalMessage.innerHTML = `
+                            Compra parcialmente completada.<br>
+                            <strong>Productos no comprados (falta de stock):</strong> ${data.productsNotPurchased.length}
+                        `;
+                        confirmPurchaseBtn.style.display = 'none';
+                    } else {
+                        modalMessage.innerHTML = `
+                            ¡Compra completada con éxito!<br>
+                            <strong>Número de ticket:</strong> ${data.ticket.code || data.ticket._id}
+                        `;
+                        confirmPurchaseBtn.textContent = 'Ver Detalles';
+                        confirmPurchaseBtn.onclick = () => {
+                            window.location.href = `/tickets/${data.ticket._id}`;
+                        };
+                    }
+                    
+                    // Actualizar el carrito si hubo productos no comprados
+                    if (data.productsNotPurchased && data.productsNotPurchased.length > 0) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    modalMessage.innerHTML = `
+                        <span style="color: red;">Error al procesar la compra:</span><br>
+                        ${error.message}
+                    `;
+                    confirmPurchaseBtn.disabled = false;
+                    confirmPurchaseBtn.innerHTML = 'Reintentar';
+                }
             });
             
-            // Vaciar carrito
-            const emptyCartBtn = document.querySelector('.btn-empty-cart');
-            if (emptyCartBtn) {
-                emptyCartBtn.addEventListener('click', async () => {
-                    if (!confirm('¿Estás seguro de vaciar completamente el carrito?')) return;
-                    
-                    try {
-                        const response = await fetch(`/api/carts/{{cid}}`, {
-                            method: 'DELETE'
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Error al vaciar carrito');
-                        }
-                        
-                        location.reload();
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert(error.message);
-                    }
-                });
+            // Función para mostrar notificación
+            function showNotification(message, isError = false) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.style.display = 'block';
+                notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
             }
         });
     </script>

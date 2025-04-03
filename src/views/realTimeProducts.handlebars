@@ -1,128 +1,240 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos en Tiempo Real</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Estilos para la notificación */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Reset del formulario después de enviar */
+        .form-reset {
+            transition: all 0.3s ease;
+        }
+        
+        .form-reset:has(:valid) {
+            opacity: 0.7;
+        }
+    </style>
 </head>
-
 <body>
     <div class="container">
-        <h1>Productos en Tiempo Real</h1>
+        <h1><i class="fas fa-bolt"></i> Productos en Tiempo Real</h1>
 
-        <!-- Botón para redirigir a home.handlebars -->
-        <a href="/" class="btn">Volver a la Lista de Productos</a>
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Volver a Productos
+            </a>
+        </div>
 
-        <!-- Formulario para crear un producto -->
-        <form id="formCrearProducto" class="product-form">
-            <!-- Título -->
+        <!-- Formulario para agregar productos -->
+        <form id="formCrearProducto" class="product-form form-reset">
+            <h2><i class="fas fa-plus-circle"></i> Agregar Nuevo Producto</h2>
             <input type="text" id="title" placeholder="Título" required>
-
-            <!-- Precio -->
-            <input type="number" id="price" placeholder="Precio" required>
-
-            <!-- Descripción -->
+            <input type="number" id="price" placeholder="Precio" step="0.01" min="0" required>
             <textarea id="description" placeholder="Descripción" required></textarea>
-
-            <!-- Categoría -->
             <input type="text" id="category" placeholder="Categoría" required>
-
-            <!-- Imagen (enlace) -->
-            <input type="url" id="image" placeholder="Enlace de la imagen" required>
-
-            <!-- Estado (true o false) -->
-            <label for="status">
-                <input type="checkbox" id="status"> Disponible
+            <input type="url" id="image" placeholder="URL de imagen" required>
+            <label>
+                <input type="checkbox" id="status" checked> Disponible
             </label>
-
-            <!-- Stock -->
-            <input type="number" id="stock" placeholder="Stock" required>
-
-            <!-- Botón de envío -->
-            <button type="submit">Crear Producto</button>
+            <input type="number" id="stock" placeholder="Stock" min="0" required>
+            <button type="submit">
+                <i class="fas fa-save"></i> Crear Producto
+            </button>
         </form>
 
-        <!-- Lista de productos -->
-        <ul id="listaProductos" class="product-list">
-            {{#each products}}
-            <li id="producto-{{this.id}}" class="product-item">
-                <div class="product-image">
-                    <img src="{{this.image}}" alt="{{this.title}}" class="thumbnail-img">
+        <!-- Notificación flotante -->
+        <div id="notification" class="notification"></div>
+
+        <!-- Lista de Productos -->
+        <div class="product-grid">
+            {{#if hasProducts}}
+                {{#each products}}
+                <div class="product-card" id="producto-{{this._id}}">
+                    <div class="product-image">
+                        <img src="{{this.displayImage}}" alt="{{this.title}}">
+                    </div>
+                    <div class="product-details">
+                        <h3>{{this.title}}</h3>
+                        <p><strong>Precio:</strong> ${{this.price}}</p>
+                        <p><strong>Stock:</strong> {{this.stock}} unidades</p>
+                        <p><strong>Estado:</strong> {{this.statusText}}</p>
+                        <button onclick="eliminarProducto('{{this._id}}')" class="delete-btn">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
-                <div class="product-info">
-                    <span class="product-title">{{this.title}}</span>
-                    <span class="product-price">${{this.price}}</span>
-                    <span class="product-stock">Stock: {{this.stock}}</span>
-                    <span class="product-status">{{#if this.status}}Disponible{{else}}No disponible{{/if}}</span>
+                {{/each}}
+            {{else}}
+                <div class="empty-state">
+                    <i class="fas fa-box-open fa-3x"></i>
+                    <p>No hay productos para mostrar</p>
                 </div>
-                <button onclick="eliminarProducto('{{this.id}}')" class="delete-btn">Eliminar</button>
-            </li>
-            {{/each}}
-        </ul>
+            {{/if}}
+        </div>
     </div>
 
-    <!-- Script de Socket.io -->
+    <!-- Socket.io -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        
+        // Función para mostrar notificaciones
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
 
-        // Escuchar evento para actualizar la lista de productos
-        socket.on('productosActualizados', (products) => {
-            const lista = document.getElementById('listaProductos');
-            lista.innerHTML = ''; // Limpiar la lista actual
-
-            // Renderizar la lista de productos
-            products.forEach(product => {
-                const nuevoProducto = document.createElement('li');
-                nuevoProducto.id = `producto-${product.id}`;
-                nuevoProducto.className = 'product-item';
-                nuevoProducto.innerHTML = `
-                    <div class="product-image">
-                        <img src="${product.image}" alt="${product.title}" class="thumbnail-img">
-                    </div>
-                    <div class="product-info">
-                        <span class="product-title">${product.title}</span>
-                        <span class="product-price">$${product.price}</span>
-                        <span class="product-stock">Stock: ${product.stock}</span>
-                        <span class="product-status">${product.status ? 'Disponible' : 'No disponible'}</span>
-                    </div>
-                    <button onclick="eliminarProducto('${product.id}')" class="delete-btn">Eliminar</button>
-                `;
-                lista.appendChild(nuevoProducto);
-            });
-        });
-
-        // Escuchar errores
-        socket.on('error', (mensaje) => {
-            alert(mensaje);
-        });
-
-        // Enviar evento para crear un producto
+        // Manejar creación de productos
         document.getElementById('formCrearProducto').addEventListener('submit', (e) => {
             e.preventDefault();
-
-            const producto = {
+            const form = e.target;
+            const product = {
                 title: document.getElementById('title').value,
                 price: parseFloat(document.getElementById('price').value),
                 description: document.getElementById('description').value,
                 category: document.getElementById('category').value,
-                image: document.getElementById('image').value,
-                thumbnail: document.getElementById('image').value, // Copiar el valor de "image" a "thumbnail"
+                thumbnails: [document.getElementById('image').value],
                 status: document.getElementById('status').checked,
                 stock: parseInt(document.getElementById('stock').value),
+                code: Math.random().toString(36).substring(2, 10).toUpperCase()
             };
-
-            // Enviar el producto al servidor
-            socket.emit('crearProducto', producto);
+            
+            // Mostrar estado de carga
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+            
+            socket.emit('crearProducto', product);
+            
+            // Resetear el formulario
+            form.reset();
+            
+            // Restaurar botón después de 2 segundos (por si hay error)
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Producto';
+            }, 2000);
         });
 
-        // Enviar evento para eliminar un producto
+        // Función para eliminar productos
         window.eliminarProducto = (id) => {
-            socket.emit('eliminarProducto', id);
+            if (confirm('¿Estás seguro de eliminar este producto?')) {
+                const productCard = document.getElementById(`producto-${id}`);
+                if (productCard) {
+                    productCard.style.opacity = '0.5';
+                    productCard.querySelector('.delete-btn').disabled = true;
+                }
+                
+                socket.emit('eliminarProducto', id);
+            }
         };
+
+        // Actualizar lista en tiempo real - VERSIÓN MEJORADA
+        socket.on('productosActualizados', (products) => {
+            console.log('Productos recibidos:', products); // Para debugging
+            
+            const productGrid = document.querySelector('.product-grid');
+            
+            // Si products es null/undefined o no es array
+            if (!products || !Array.isArray(products)) {
+                console.error('Formato de productos inválido:', products);
+                productGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open fa-3x"></i>
+                        <p>No hay productos para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (products.length === 0) {
+                productGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open fa-3x"></i>
+                        <p>No hay productos para mostrar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productGrid.innerHTML = products.map(product => {
+                // Validación de propiedades del producto
+                const safeProduct = {
+                    _id: product._id || product.id || 'sin-id',
+                    title: product.title || 'Sin título',
+                    price: typeof product.price === 'number' ? product.price.toFixed(2) : '0.00',
+                    stock: product.stock || 0,
+                    status: !!product.status,
+                    thumbnails: Array.isArray(product.thumbnails) ? product.thumbnails : []
+                };
+                
+                return `
+                <div class="product-card" id="producto-${safeProduct._id}">
+                    <div class="product-image">
+                        <img src="${safeProduct.thumbnails[0] || '/img/default-product.png'}" alt="${safeProduct.title}">
+                    </div>
+                    <div class="product-details">
+                        <h3>${safeProduct.title}</h3>
+                        <p><strong>Precio:</strong> $${safeProduct.price}</p>
+                        <p><strong>Stock:</strong> ${safeProduct.stock} unidades</p>
+                        <p><strong>Estado:</strong> ${safeProduct.status ? 'Disponible' : 'No disponible'}</p>
+                        <button onclick="eliminarProducto('${safeProduct._id}')" class="delete-btn">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            // Mostrar notificación de actualización
+            showNotification('Lista de productos actualizada');
+        });
+
+        // Manejar errores del servidor
+        socket.on('error', (errorData) => {
+            console.error('Error del servidor:', errorData);
+            showNotification(errorData.message || 'Error en el servidor', true);
+            
+            // Restaurar botones si es necesario
+            const submitBtn = document.querySelector('#formCrearProducto button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Producto';
+            }
+        });
     </script>
 </body>
-
 </html>

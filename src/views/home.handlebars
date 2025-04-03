@@ -5,15 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Productos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
     <div class="container">
         <h1>Lista de productos</h1>
-        <!-- Botón para redirigir a realtimeproducts.handlebars -->
-        <a href="/realtimeproducts" class="btn">Ir a Agregar/Eliminar Productos</a>
-        
+
+        <div class="nav-buttons">
+            <a href="/realtimeproducts" class="nav-btn realtime-btn">
+                <i class="fas fa-bolt"></i> Agregar/Eliminar Productos
+            </a>
+            <a href="/carts" class="nav-btn cart-btn">
+                <i class="fas fa-shopping-cart"></i> Ver Carrito
+            </a>
+        </div>
+
         {{#if productos.length}}
         <div class="product-grid">
             {{#each productos}}
@@ -37,11 +45,11 @@
         {{#if pagination}}
         <div class="pagination-container">
             {{#if pagination.hasPrevPage}}
-                <a href="{{pagination.prevLink}}" class="pagination-btn">Anterior</a>
+            <a href="{{pagination.prevLink}}" class="pagination-btn">Anterior</a>
             {{/if}}
             <span class="pagination-info">Página {{pagination.page}} de {{pagination.totalPages}}</span>
             {{#if pagination.hasNextPage}}
-                <a href="{{pagination.nextLink}}" class="pagination-btn">Siguiente</a>
+            <a href="{{pagination.nextLink}}" class="pagination-btn">Siguiente</a>
             {{/if}}
         </div>
         {{/if}}

@@ -14,6 +14,7 @@ import productsMongoRouter  from './routes/productsMongoRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
 import { conectarDB } from './utils/conDB.js';
 import { config } from './config/config.js';
+import { cartModelo } from './dao/models/cartsModelo.js';
 
 
 // Configuración de __dirname para ES Modules
@@ -55,27 +56,38 @@ app.use("/", viewsRouter);                // Rutas de las vistas (Handlebars)
 
 // Configuración de Socket.io
 io.on('connection', (socket) => {
-    console.log('Nuevo cliente conectado');
-
-    // Escuchar evento para crear un producto
     socket.on('crearProducto', async (producto) => {
         try {
-            await ProductosMongoManager.save(producto); // Llamar al método estático
-            const products = await ProductosMongoManager.get(); // Llamar al método estático
-            io.emit('productosActualizados', products); // Emitir la lista actualizada
+            const nuevoProducto = await ProductosMongoManager.create(producto);
+            const products = await ProductosMongoManager.get({}, { lean: true });
+            
+            // Asegúrate de enviar el array de documentos correctamente
+            io.emit('productosActualizados', products.docs || products); // Usa products.docs si existe, sino products directamente
         } catch (error) {
-            socket.emit('error', error.message);
+            console.error("Error en crearProducto:", error);
+            socket.emit('error', { message: 'No se pudo crear el producto', error: error.message });
         }
     });
 
-    // Escuchar evento para eliminar un producto
     socket.on('eliminarProducto', async (id) => {
         try {
-            await ProductosMongoManager.delete(id); // Llamar al método estático
-            const products = await ProductosMongoManager.get(); // Llamar al método estático
-            io.emit('productosActualizados', products); // Emitir la lista actualizada
+            await ProductosMongoManager.delete(id);
+            const products = await ProductosMongoManager.get({}, { lean: true });
+            io.emit('productosActualizados', products.docs || products);
         } catch (error) {
-            socket.emit('error', error.message);
+            console.error("Error en eliminarProducto:", error);
+            socket.emit('error', { message: 'No se pudo eliminar el producto', error: error.message });
+        }
+    });
+});
+
+io.on('connection', (socket) => {
+    socket.on('eliminarCarrito', async (cartId) => {
+        try {
+            await cartModelo.findByIdAndDelete(cartId);
+            io.emit('carritoEliminado', cartId);
+        } catch (error) {
+            console.error('Error al eliminar carrito:', error);
         }
     });
 });

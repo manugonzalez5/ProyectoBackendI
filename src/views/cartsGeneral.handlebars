@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Carritos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Todos los Carritos</h1>
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> Volver al inicio
+            </a>
+        </div>
+        
+        {{#if hasCarts}}
+            <div class="list-group">
+                {{#each carts}}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="/carts/{{this._id}}" class="flex-grow-1 text-decoration-none text-dark">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Carrito ID: {{this._id}}</h5>
+                                    <small>{{this.products.length}} productos</small>
+                                </div>
+                                <p class="mb-1">Creado el: {{this.createdAt}}</p>
+                            </a>
+                            <button class="btn btn-danger btn-sm ms-3 delete-cart" data-cart-id="{{this._id}}">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+        {{else}}
+            <div class="alert alert-info">
+                No hay carritos disponibles.
+            </div>
+        {{/if}}
+    </div>
+
+    <!-- Font Awesome para iconos -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Socket.io para eliminación en tiempo real -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <script>
+        // Conexión Socket.io
+        const socket = io();
+        
+        // Manejar eliminación de carritos
+        document.querySelectorAll('.delete-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const cartId = this.getAttribute('data-cart-id');
+                if (confirm('¿Estás seguro de eliminar este carrito?')) {
+                    socket.emit('eliminarCarrito', cartId);
+                }
+            });
+        });
+
+        // Actualizar vista cuando se elimina un carrito
+        socket.on('carritoEliminado', (cartId) => {
+            const cartElement = document.querySelector(`[data-cart-id="${cartId}"]`).closest('.list-group-item');
+            cartElement.remove();
+            
+            // Mostrar mensaje si no quedan carritos
+            if (document.querySelectorAll('.list-group-item').length === 0) {
+                document.querySelector('.list-group').innerHTML = `
+                    <div class="alert alert-info">
+                        No hay carritos disponibles.
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

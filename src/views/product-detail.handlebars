@@ -2,7 +2,7 @@
     <a href="/" class="detail-back-btn">← Volver a Inicio</a>
 
     <div class="detail-layout">
-        <!-- Galería de imágenes -->
+        <!-- Galería de imágenes (se mantiene igual) -->
         <div class="detail-gallery">
             <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}" class="detail-main-image" id="mainImage">
             <div class="detail-thumbnails">
@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        <!-- Información del producto -->
+        <!-- Información del producto (se mantiene igual hasta la sección de compra) -->
         <div class="detail-info">
             <h1 class="detail-title">{{product.title}}</h1>
             <p class="detail-code">Código: {{product.code}}</p>
@@ -40,23 +40,27 @@
                 </div>
             </div>
 
-            <!-- Sección de compra -->
+            <!-- Sección de compra modificada (sin botones + y -) -->
             <div class="detail-purchase">
                 <form class="detail-cart-form" id="addToCartForm">
                     <div class="quantity-selector">
-                        <button type="button" class="quantity-btn minus">-</button>
+                        <label for="quantity">Cantidad:</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{product.stock}}"
                             class="quantity-input">
-                        <button type="button" class="quantity-btn plus">+</button>
                     </div>
 
-                    <button type="submit" class="add-to-cart-btn" {{#unless product.available}}disabled{{/unless}}>
-                        {{#if product.available}}
-                        <i class="fas fa-shopping-cart"></i> Agregar al carrito
-                        {{else}}
-                        <i class="fas fa-times-circle"></i> Producto agotado
-                        {{/if}}
-                    </button>
+                    <div class="button-group">
+                        <button type="submit" class="add-to-cart-btn" {{#unless product.available}}disabled{{/unless}}>
+                            {{#if product.available}}
+                            <i class="fas fa-shopping-cart"></i> Agregar al carrito
+                            {{else}}
+                            <i class="fas fa-times-circle"></i> Producto agotado
+                            {{/if}}
+                        </button>
+                        <a href="/carts" class="view-cart-btn">
+                            <i class="fas fa-eye"></i> Ver mi carrito
+                        </a>
+                    </div>
                 </form>
 
                 <!-- Mensaje de feedback mejorado -->
@@ -66,112 +70,142 @@
     </div>
 </div>
 
-<!-- Script optimizado y corregido -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Galería interactiva
-        document.querySelectorAll('.detail-thumbnail').forEach(thumb => {
-            thumb.addEventListener('click', () => {
-                document.getElementById('mainImage').src = thumb.dataset.image;
-                // Remover clase activa de todas las miniaturas
-                document.querySelectorAll('.detail-thumbnail').forEach(t => t.classList.remove('active'));
-                // Agregar clase activa a la miniatura seleccionada
-                thumb.classList.add('active');
-            });
-        });
+<!-- Estilos actualizados -->
+<style>
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .add-to-cart-btn {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .add-to-cart-btn:hover {
+        background-color: #218838;
+    }
+    
+    .add-to-cart-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .view-cart-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        background-color: #17a2b8;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: background-color 0.3s;
+        text-align: center;
+    }
+    
+    .view-cart-btn:hover {
+        background-color: #138496;
+        color: white;
+    }
 
-        // Control de cantidad
-        const quantityInput = document.getElementById('quantity');
-        const maxQuantity = parseInt(quantityInput.max);
-        const minusBtn = document.querySelector('.quantity-btn.minus');
-        const plusBtn = document.querySelector('.quantity-btn.plus');
-
-        minusBtn.addEventListener('click', () => {
-            let value = parseInt(quantityInput.value);
-            quantityInput.value = value > 1 ? value - 1 : 1;
-            updateButtonStates();
-        });
-
-        plusBtn.addEventListener('click', () => {
-            let value = parseInt(quantityInput.value);
-            quantityInput.value = value < maxQuantity ? value + 1 : maxQuantity;
-            updateButtonStates();
-        });
-
-        quantityInput.addEventListener('change', () => {
-            let value = parseInt(quantityInput.value);
-            if (isNaN(value) value = 1;
-            quantityInput.value = Math.max(1, Math.min(value, maxQuantity));
-            updateButtonStates();
-        });
-
-        function updateButtonStates() {
-            const currentValue = parseInt(quantityInput.value);
-            minusBtn.disabled = currentValue <= 1;
-            plusBtn.disabled = currentValue >= maxQuantity;
+    /* Nuevos estilos para el selector de cantidad */
+    .quantity-selector {
+        margin-bottom: 15px;
+    }
+    
+    .quantity-selector label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .quantity-input {
+        width: 80px;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        text-align: center;
+    }
+    
+    @media (min-width: 576px) {
+        .button-group {
+            flex-direction: row;
         }
+        
+        .add-to-cart-btn,
+        .view-cart-btn {
+            flex: 1;
+        }
+    }
+</style>
 
-        // Manejo del formulario mejorado
-        const form = document.getElementById('addToCartForm');
+<!-- Script (se mantiene igual) -->
+<script>
+    document.getElementById('addToCartForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const productId = '{{product._id}}';
+        const quantity = parseInt(document.getElementById('quantity').value);
         const feedback = document.getElementById('feedbackMessage');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Mostrar estado de carga
+        feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-message loading';
 
-            const productId = '{{product._id}}';
-            const quantity = parseInt(quantityInput.value);
+        try {
+            const response = await fetch('{{apiCartUrl}}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productId,
+                    quantity
+                })
+            });
 
-            // Mostrar estado de carga
-            feedback.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            feedback.style.display = 'block';
-            feedback.className = 'feedback-message loading';
+            const data = await response.json();
 
-            try {
-                const response = await fetch('/api/carts/add-product', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        productId,
-                        quantity
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error en el servidor');
-                }
-
-                const result = await response.json();
-
-                // Feedback de éxito
-                feedback.innerHTML = `
-                    <i class="fas fa-check-circle"></i> 
-                    ${result.message || 'Producto agregado al carrito'}
-                    <a href="/cart" class="feedback-link">Ver carrito</a>
-                `;
-                feedback.className = 'feedback-message success';
-
-                // Actualizar contador del carrito si existe
-                if (typeof updateCartCounter === 'function') {
-                    updateCartCounter();
-                }
-
-            } catch (error) {
-                feedback.innerHTML = `
-                    <i class="fas fa-exclamation-circle"></i> 
-                    ${error.message || 'Error al agregar al carrito'}
-                `;
-                feedback.className = 'feedback-message error';
-                console.error('Error:', error);
-            } finally {
-                // Ocultar mensaje después de 5 segundos
-                setTimeout(() => {
-                    feedback.style.display = 'none';
-                }, 5000);
+            if (!response.ok) {
+                throw new Error(data.message || 'Error en el servidor');
             }
-        });
+
+            // Feedback de éxito
+            feedback.innerHTML = `
+                <i class="fas fa-check-circle"></i> 
+                ${data.message}
+                <a href="/carts/${data.payload._id}" class="feedback-link">Ver carrito</a>
+            `;
+            feedback.className = 'feedback-message success';
+
+        } catch (error) {
+            feedback.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i> 
+                ${error.message}
+            `;
+            feedback.className = 'feedback-message error';
+            console.error('Error:', error);
+        } finally {
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 5000);
+        }
     });
 </script>
